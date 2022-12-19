@@ -13,4 +13,7 @@ Hold right mouse button and drag to change the camera distance.
 The project uses OpenGL 4.6.
 
 Here is a demo with the famouse Utah teapot:  
-![Alt Text](demo.gif)
+![Alt Text](demo.gif)  
+
+Also this:  
+![Alt Text](demo2.gif)

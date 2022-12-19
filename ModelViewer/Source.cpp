@@ -39,7 +39,7 @@ float pitch_light = 0;
 int main() {
     std::cout << "Enter the name of the obj model: ";
     std::string fileName;
-    std::cin >> fileName;
+    std::getline(std::cin, fileName);
     cyTriMesh ctm;
     if (!ctm.LoadFromFileObj((fileName+".obj").c_str())) {
         return -1;
