@@ -12,8 +12,8 @@ Hold right mouse button and drag to change the camera distance.
 [cyTriMesh.h](https://github.com/cemyuksel/cyCodeBase/blob/master/cyTriMesh.h) was used for reading model data.  
 The project uses OpenGL 4.6.
 
-Here is a demo with the famouse Utah teapot:  
+Here is a demo with the famous Utah teapot:  
 ![Alt Text](demo.gif)  
 
-Also this:  
+Also this yoda with 7 materials:  
 ![Alt Text](demo2.gif)
