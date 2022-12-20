@@ -13,8 +13,10 @@ Hold right mouse button and drag to change the camera distance.
 [GLM](https://glm.g-truc.net/0.9.8/index.html) library was used for the 3D mathematics.
 The project uses OpenGL 4.6.
 
-Here is a demo with the famous Utah teapot:  
-![Alt Text](demo.gif)  
+A demo of the project can be found [here](https://youtu.be/ZYSf9GgbSG4)  
 
-Also this yoda with 7 materials:  
-![Alt Text](demo2.gif)
+![Alt Text](teapot.png)  
+The famous Utah teapot    
+  
+![Alt Text](yoda.png)  
+Also this yoda with 7 materials
