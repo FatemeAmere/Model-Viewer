@@ -32,7 +32,12 @@ bool ShouldRotateLight = false;
 float yaw_light = 0;
 float pitch_light = 0;
 
-Model* model;
+Model* cubeModel;
+const char* cubemapImageNames[6] = {
+    "right.jpg", "left.jpg", 
+    "top.jpg", "bottom.jpg",
+    "front.jpg", "back.jpg"
+};
 #pragma endregion
 
 int main() {
@@ -76,15 +81,45 @@ int main() {
 #pragma region TRANSFORMATION
     glm::mat4 projection = glm::mat4(1.0f); 
     glm::mat4 view = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 500.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -30.0f));
+    projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 500.0f);
     
     glm::vec4 lightPosition = glm::vec4(0, 20, 200, 1);
     glm::mat4 lightRotation = glm::mat4(1.0f);
 #pragma endregion
 
-    Shader shader("VertexShader.vs", "FragmentShader.fs");
-    model = new Model(ctm, shader, view, projection);
+#pragma region cubeMap
+    Shader cubeMapShader("VertexShader.vs", "CubeMapFragmentShader.fs");
+    cubeModel = new Model(ctm, cubeMapShader, -glm::vec3(0.0f, 0.0f, -30.0f), view, projection, false, true, false);
+
+    //textures
+    stbi_set_flip_vertically_on_load(false);
+    GLuint cubeMapTexID;
+    glGenTextures(1, &cubeMapTexID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
+    int width, height, nrChannels;
+    unsigned char* data;
+    for (unsigned int i = 0; i < 6; i++)
+    {
+        data = stbi_load(cubemapImageNames[i], &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
+        else
+        {
+            std::cout << "Failed to load texture " << cubemapImageNames[0] << std::endl;
+        }
+        stbi_image_free(data);
+    }
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    
+#pragma endregion
 
 #pragma region render loop
     while (!glfwWindowShouldClose(window))
@@ -98,16 +133,22 @@ int main() {
         lightRotation = glm::translate(lightRotation, glm::vec3(0, 0, -cameraDistance));
         lightRotation = glm::rotate(lightRotation, glm::radians(yaw_light), glm::vec3(0, 1, 0));
         lightRotation = glm::rotate(lightRotation, glm::radians(pitch_light), glm::vec3(1, 0, 0));
-        model->setLightPosition(lightRotation * lightPosition);
+        cubeModel->setLightPosition(lightRotation * lightPosition);
 
-        model->Draw();
+        glDepthMask(GL_FALSE);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
+        cubeModel->Draw();
+
+        glDepthMask(GL_TRUE);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 #pragma endregion
 
-    delete model;
+    delete cubeModel;
     glfwTerminate();
     return 0;
 }
@@ -165,7 +206,7 @@ void mouseMovementCallback(GLFWwindow* window, double xpos, double ypos) {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     if (ShouldRotateModel) {
-        model->rotate(xoffset, yoffset);
+        cubeModel->rotate(xoffset, yoffset);
     }
 
     if (ShouldRotateLight) {
@@ -175,6 +216,6 @@ void mouseMovementCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ShouldMoveFromCamera) {
         cameraDistance += yoffset;
-        model->adjustDistanceFromCamera(yoffset);
+        cubeModel->adjustDistanceFromCamera(yoffset);
     }
 }

@@ -136,6 +136,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CubeMapFragmentShader.fs" />
     <None Include="FragmentShader.fs" />
     <None Include="VertexShader.vs" />
   </ItemGroup>
