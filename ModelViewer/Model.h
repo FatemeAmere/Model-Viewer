@@ -18,7 +18,7 @@ private:
 
     //control
     bool loadMaterial;
-    bool movementenabled;
+    bool movementIsEnabled;
     bool rotateAxis;
 
     //transformation
@@ -33,8 +33,8 @@ private:
 	Model();
 
 public:
-	Model(cyTriMesh ctm, Shader shader, glm::vec3 posInWorld, glm::mat4 view, glm::mat4 projection, bool loadMaterial = true, bool movementenabled = true, bool rotateAxis = true): ctm(ctm),
-        materialCount(0), shader(shader), view(view), projection(projection), posInWorld(posInWorld), loadMaterial(loadMaterial), movementenabled(movementenabled), rotateAxis(rotateAxis){
+	Model(cyTriMesh ctm, Shader shader, glm::vec3 posInWorld, glm::mat4 view, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
+        materialCount(0), shader(shader), view(view), projection(projection), posInWorld(posInWorld), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
 
         stbi_set_flip_vertically_on_load(true);
 
@@ -112,7 +112,7 @@ public:
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, posInWorld);
-        if (movementenabled) {
+        if (movementIsEnabled) {
             modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, -cameraDistance));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(pitch), glm::vec3(1, 0, 0));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(yaw), glm::vec3(0, 1, 0));

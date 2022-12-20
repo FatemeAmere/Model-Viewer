@@ -40,5 +40,5 @@ void main(){
 	vec3 diffuse = max(0,dot(norm,lightDir)) * Kd;
 	vec3 specular = pow(max(0,dot(halfVec, norm)),shininess) * Ks;
 	FragColor = vec4(I*(diffuse + specular) + ambient*Ka, 1.0f);
-	FragColor = vec4(1,1,1,1);
+	//FragColor = vec4(1,1,1,1);
 }

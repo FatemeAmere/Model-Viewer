@@ -15,8 +15,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouseMovementCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void ManageTextures(GLuint* textures, cyTriMesh ctm, size_t materialNum);
-void SetTextureData(const char* name);
 
 #pragma region parameters
 const unsigned int SCR_WIDTH = 800;
@@ -92,6 +90,9 @@ int main() {
     Shader cubeMapShader("VertexShader.vs", "CubeMapFragmentShader.fs");
     cubeModel = new Model(ctm, cubeMapShader, -glm::vec3(0.0f, 0.0f, -30.0f), view, projection, false, true, false);
 
+    Shader otherShader("VertexShader.vs", "FragmentShader.fs");
+    Model*  otherModel = new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, true, false, true);
+
     //textures
     stbi_set_flip_vertically_on_load(false);
     GLuint cubeMapTexID;
@@ -116,9 +117,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 #pragma endregion
 
 #pragma region render loop
