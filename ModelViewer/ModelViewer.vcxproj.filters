@@ -46,5 +46,8 @@
     <ClInclude Include="Shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
