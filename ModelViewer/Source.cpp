@@ -30,6 +30,8 @@ bool ShouldRotateLight = false;
 float yaw_light = 0;
 float pitch_light = 0;
 
+std::vector<Model*> models;
+
 Model* cubeModel;
 const char* cubemapImageNames[6] = {
     "right.jpg", "left.jpg", 
@@ -39,10 +41,17 @@ const char* cubemapImageNames[6] = {
 #pragma endregion
 
 int main() {
-    std::cout << "Enter the name of the obj model: ";
+    std::cout << "Enter the name of the cubemap obj model: ";
     std::string fileName;
     std::getline(std::cin, fileName);
 
+    cyTriMesh cubeMap_ctm;
+    if (!cubeMap_ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
+        return -1;
+    }
+
+    std::cout << "Enter the name of the other obj model: ";
+    std::getline(std::cin, fileName);
     cyTriMesh ctm;
     if (!ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
         return -1;
@@ -79,7 +88,8 @@ int main() {
 #pragma region TRANSFORMATION
     glm::mat4 projection = glm::mat4(1.0f); 
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -30.0f));
+    glm::vec3 cameraPos = glm::vec3(0, 0, 30.0f);
+    view = glm::translate(view, -cameraPos);
     projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 500.0f);
     
     glm::vec4 lightPosition = glm::vec4(0, 20, 200, 1);
@@ -88,10 +98,11 @@ int main() {
 
 #pragma region cubeMap
     Shader cubeMapShader("VertexShader.vs", "CubeMapFragmentShader.fs");
-    cubeModel = new Model(ctm, cubeMapShader, -glm::vec3(0.0f, 0.0f, -30.0f), view, projection, false, true, false);
+    cubeModel = new Model(cubeMap_ctm, cubeMapShader, cameraPos, glm::vec3(20.0f, 20.0f, 20.0f), view, projection, false, true, false);
+    models.push_back(cubeModel);
 
     Shader otherShader("VertexShader.vs", "FragmentShader.fs");
-    Model*  otherModel = new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, true, false, true);
+    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, false, true, false));
 
     //textures
     stbi_set_flip_vertically_on_load(false);
@@ -132,7 +143,16 @@ int main() {
         lightRotation = glm::translate(lightRotation, glm::vec3(0, 0, -cameraDistance));
         lightRotation = glm::rotate(lightRotation, glm::radians(yaw_light), glm::vec3(0, 1, 0));
         lightRotation = glm::rotate(lightRotation, glm::radians(pitch_light), glm::vec3(1, 0, 0));
-        cubeModel->setLightPosition(lightRotation * lightPosition);
+        //cubeModel->setLightPosition(lightRotation * lightPosition);
+        for(Model * m : models)
+        {
+            m->setLightPosition(lightRotation * lightPosition);
+        }
+
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
+        models[1]->setCubeMapOrientation(cubeModel->getModelMatrix());
+        models[1]->Draw();
 
         glDepthMask(GL_FALSE);
 
@@ -205,7 +225,11 @@ void mouseMovementCallback(GLFWwindow* window, double xpos, double ypos) {
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     if (ShouldRotateModel) {
-        cubeModel->rotate(xoffset, yoffset);
+        //cubeModel->rotate(xoffset, yoffset);
+        for (Model* m : models)
+        {
+            m->rotate(xoffset, yoffset);
+        }
     }
 
     if (ShouldRotateLight) {
@@ -215,6 +239,10 @@ void mouseMovementCallback(GLFWwindow* window, double xpos, double ypos) {
 
     if (ShouldMoveFromCamera) {
         cameraDistance += yoffset;
-        cubeModel->adjustDistanceFromCamera(yoffset);
+        //cubeModel->adjustDistanceFromCamera(yoffset);
+        for (Model* m : models)
+        {
+            m->adjustDistanceFromCamera(yoffset);
+        }
     }
 }

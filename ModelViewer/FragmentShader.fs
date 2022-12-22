@@ -24,6 +24,12 @@ uniform sampler2D alphaTexture;
 
 uniform vec3 lightPosition;
 
+uniform samplerCube cubemap;
+
+uniform mat4 cubeMapOrientation;
+in vec3 cubemapPos;
+in vec3 cubemapNorm;
+
 void main(){
 	vec3 I = vec3(1,1,1);
 	vec3 Kd = usetexd ? texture(diffuseTexture, texCoord).rgb : kd;
@@ -39,6 +45,13 @@ void main(){
 
 	vec3 diffuse = max(0,dot(norm,lightDir)) * Kd;
 	vec3 specular = pow(max(0,dot(halfVec, norm)),shininess) * Ks;
-	FragColor = vec4(I*(diffuse + specular) + ambient*Ka, 1.0f);
-	//FragColor = vec4(1,1,1,1);
+	//FragColor = vec4(I*(diffuse + specular) + ambient*Ka, 1.0f);
+	//vec3 dir = reflect(vec3(0,0,30) - cubemapPos, normalize(cubemapNorm));
+	//vec3 dir = reflect(view, norm);
+	//FragColor = texture(cubemap, mat3(cubeMapOrientation) * dir);
+
+
+	vec3 Ic = normalize(cubemapPos - vec3(0,0,30));
+    vec3 R = reflect(Ic, normalize(cubemapNorm));
+    FragColor = vec4(texture(cubemap, R).rgb, 1.0);
 }

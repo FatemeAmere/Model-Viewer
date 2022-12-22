@@ -25,16 +25,20 @@ private:
     float yaw = 0;
     float pitch = 0;
     float cameraDistance = 0;
-    glm::vec4 lightPos;
-    glm::mat4 projection = glm::mat4(1.0f);
+    glm::vec4 lightPos = glm::vec4(0, 0, 0, 1);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
-    glm::vec3 posInWorld = glm::vec3(0,0,0);
+    glm::mat4 projection = glm::mat4(1.0f);
+    glm::vec3 translation = glm::vec3(0,0,0);
+    glm::vec3 scale = glm::vec3(1,1,1);
+
+    glm::mat4 cubeMapOrientation = glm::mat4(1.0f);;
 
 	Model();
 
 public:
-	Model(cyTriMesh ctm, Shader shader, glm::vec3 posInWorld, glm::mat4 view, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
-        materialCount(0), shader(shader), view(view), projection(projection), posInWorld(posInWorld), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
+	Model(cyTriMesh ctm, Shader shader, glm::vec3 translation, glm::vec3 scale, glm::mat4 view, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
+        materialCount(0), shader(shader), view(view), projection(projection), translation(translation), scale(scale), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
 
         stbi_set_flip_vertically_on_load(true);
 
@@ -52,9 +56,9 @@ public:
             for (size_t j = 0; j < 3; j++)
             {
                 //vertices
-                vertices.push_back((ctm.V(ctm.F(i).v[j]).x - boundMiddle.x) / ModelSize);
-                vertices.push_back((ctm.V(ctm.F(i).v[j]).y - boundMiddle.y) / ModelSize);
-                vertices.push_back((ctm.V(ctm.F(i).v[j]).z - boundMiddle.z) / ModelSize);
+                vertices.push_back((ctm.V(ctm.F(i).v[j]).x - boundMiddle.x) / ModelSize * scale.x);
+                vertices.push_back((ctm.V(ctm.F(i).v[j]).y - boundMiddle.y) / ModelSize * scale.y);
+                vertices.push_back((ctm.V(ctm.F(i).v[j]).z - boundMiddle.z) / ModelSize * scale.z);
                 //normals
                 if (ctm.HasNormals()) {
                     vertices.push_back(ctm.VN(ctm.FN(i).v[j]).x);
@@ -104,24 +108,36 @@ public:
             shader.setInt("specularTexture", 2);
             shader.setInt("specularExponentTexture", 3);
             shader.setInt("alphaTexture", 4);
+            shader.setInt("cubemap", 5);
         }
         #pragma endregion  
 	}
 
-    void Draw() {
+    ~Model() {
+        for (size_t i = 0; i < materialCount; i++)
+        {
+            delete textures[i];
+            glDeleteVertexArrays(1, &VAO);
+            glDeleteBuffers(1, &VBO);
+        }
+    }
 
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, posInWorld);
+    void Draw() {
+        shader.use();
+
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, translation);
         if (movementIsEnabled) {
             modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, -cameraDistance));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(pitch), glm::vec3(1, 0, 0));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(yaw), glm::vec3(0, 1, 0));
         }
+
         if (rotateAxis) {
             modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
         }
 
-        shader.use();
+        shader.setMat4("m",  modelMatrix);
         shader.setMat4("mvp", projection * view * modelMatrix);
         shader.setMat4("mv", view * modelMatrix);
         shader.setMat4("mvN", glm::transpose(glm::inverse(view * modelMatrix)));   //mv for Normals
@@ -225,15 +241,6 @@ public:
         lightPos = view * lp;
     }
 
-    ~Model() {
-        for (size_t i = 0; i < materialCount; i++)
-        {
-            delete textures[i];
-            glDeleteVertexArrays(1, &VAO);
-            glDeleteBuffers(1, &VBO);
-        }
-    }
-
     void rotate(float xoffset, float yoffset) {
         yaw += xoffset;
         pitch += yoffset;
@@ -241,6 +248,16 @@ public:
 
     void adjustDistanceFromCamera(float offset) {
         cameraDistance += offset;
+    }
+
+    void setCubeMapOrientation(glm::mat4 cmo) {
+        cubeMapOrientation = cmo;
+        shader.use();
+        shader.setMat4("cubeMapOrientation", cmo);
+    }
+
+    glm::mat4 getModelMatrix() const {
+        return modelMatrix;
     }
 };
 

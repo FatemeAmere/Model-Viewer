@@ -8,7 +8,5 @@ uniform samplerCube cubemap;
 
 
 void main(){
-	vec3 dir = 	cubemapDir;
 	FragColor = texture(cubemap, cubemapDir);
-
 }

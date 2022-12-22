@@ -137,7 +137,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeMapFragmentShader.fs" />
+    <None Include="CubeVertexShader.vs" />
     <None Include="FragmentShader.fs" />
+    <None Include="ReflectiveFragementShader.fs" />
+    <None Include="ReflectiveVertexShader.vs" />
     <None Include="VertexShader.vs" />
   </ItemGroup>
   <ItemGroup>

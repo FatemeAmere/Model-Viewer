@@ -13,8 +13,7 @@ out vec3 normal;
 out vec3 posForColoring;
 out vec2 texCoord;
 out vec3 cubemapDir;
-out vec3 cubemapPos;
-out vec3 cubemapNorm;
+out vec3 cubemapDirForObject;
 
 void main(){
 	gl_Position = mvp * vec4(pos,1);
@@ -22,9 +21,6 @@ void main(){
 	normal = mat3(mvN) * norm;
 	texCoord = tex;
 
-	//cubemapPos = (m * vec4(pos,1)).xyz;
-	//cubemapNorm = (transpose(inverse(m)) * vec4(norm,1)).xyz;
 	cubemapDir = pos;
-	cubemapPos = (m*vec4(pos,1)).xyz;
-	cubemapNorm = transpose(inverse(mat3(m))) * norm;
+	cubemapDirForObject = norm;
 }
