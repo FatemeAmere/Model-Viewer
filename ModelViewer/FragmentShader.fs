@@ -53,5 +53,5 @@ void main(){
 
 	vec3 Ic = normalize(cubemapPos - vec3(0,0,30));
     vec3 R = reflect(Ic, normalize(cubemapNorm));
-    FragColor = vec4(texture(cubemap, R).rgb, 1.0);
+    FragColor = vec4(texture(cubemap,mat3(cubeMapOrientation) * R).rgb, 1.0);
 }
