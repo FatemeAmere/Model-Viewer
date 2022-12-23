@@ -24,4 +24,4 @@ Also this yoda with 7 materials
 UPDATE:
 Cubemaps and environment mapping now supported. Press C/V to activate/deactivate cubemaps.  
 
-![Alt Text](cubemap.png | width=100)  
+<img src="cubemap.png" width=50% height=50%>
