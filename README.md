@@ -15,10 +15,10 @@ The project uses OpenGL 4.6.
 
 A demo of the project can be found [here](https://youtu.be/ZYSf9GgbSG4)  
 
-![Alt Text](teapot.png)  
+<img src="teapot.png" width=50% height=50%>
 The famous Utah teapot    
   
-![Alt Text](yoda.png)  
+<img src="yoda.png" width=50% height=50%>
 Also this yoda with 7 materials
 
 UPDATE:
