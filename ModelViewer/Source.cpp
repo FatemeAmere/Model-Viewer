@@ -31,8 +31,7 @@ float yaw_light = 0;
 float pitch_light = 0;
 
 std::vector<Model*> models;
-
-Model* cubeModel;
+bool showCubeMap = false;
 const char* cubemapImageNames[6] = {
     "right.jpg", "left.jpg", 
     "top.jpg", "bottom.jpg",
@@ -41,16 +40,14 @@ const char* cubemapImageNames[6] = {
 #pragma endregion
 
 int main() {
-    std::cout << "Enter the name of the cubemap obj model: ";
-    std::string fileName;
-    std::getline(std::cin, fileName);
-
+    //cubemap
+    std::string fileName = "cube";
     cyTriMesh cubeMap_ctm;
     if (!cubeMap_ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
         return -1;
     }
 
-    std::cout << "Enter the name of the other obj model: ";
+    std::cout << "Enter the name of the obj model: ";
     std::getline(std::cin, fileName);
     cyTriMesh ctm;
     if (!ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
@@ -83,13 +80,14 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #pragma endregion
 
 #pragma region TRANSFORMATION
-    glm::mat4 projection = glm::mat4(1.0f); 
-    glm::mat4 view = glm::mat4(1.0f);
     glm::vec3 cameraPos = glm::vec3(0, 0, 30.0f);
+    glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, -cameraPos);
+    glm::mat4 projection = glm::mat4(1.0f); 
     projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 500.0f);
     
     glm::vec4 lightPosition = glm::vec4(0, 20, 200, 1);
@@ -98,11 +96,7 @@ int main() {
 
 #pragma region cubeMap
     Shader cubeMapShader("VertexShader.vs", "CubeMapFragmentShader.fs");
-    cubeModel = new Model(cubeMap_ctm, cubeMapShader, cameraPos, glm::vec3(20.0f, 20.0f, 20.0f), view, projection, false, true, false);
-    models.push_back(cubeModel);
-
-    Shader otherShader("VertexShader.vs", "FragmentShader.fs");
-    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, false, true, false));
+    models.push_back(new Model(cubeMap_ctm, cubeMapShader, cameraPos, glm::vec3(20.0f, 20.0f, 20.0f), view, projection, false, true, false));
 
     //textures
     stbi_set_flip_vertically_on_load(false);
@@ -131,6 +125,11 @@ int main() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
 #pragma endregion
 
+    Shader otherShader("VertexShader.vs", "FragmentShader.fs");
+    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, -30.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, true));
+    /*std::cout << ctm.M(0).name;
+    models.push_back(new Model(ctm, otherShader, glm::vec3(5.0f, 0.0f, -30.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, false));*/
+
 #pragma region render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -143,31 +142,38 @@ int main() {
         lightRotation = glm::translate(lightRotation, glm::vec3(0, 0, -cameraDistance));
         lightRotation = glm::rotate(lightRotation, glm::radians(yaw_light), glm::vec3(0, 1, 0));
         lightRotation = glm::rotate(lightRotation, glm::radians(pitch_light), glm::vec3(1, 0, 0));
-        //cubeModel->setLightPosition(lightRotation * lightPosition);
+
         for(Model * m : models)
         {
             m->setLightPosition(lightRotation * lightPosition);
         }
-
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
-        models[1]->setCubeMapOrientation(cubeModel->getModelMatrix());
+        if (showCubeMap) {
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
+            models[1]->setCubeMapOrientation(models[0]->getModelMatrix());
+        } 
+        models[1]->ToggleCubeMapReflections(showCubeMap);
         models[1]->Draw();
 
-        glDepthMask(GL_FALSE);
+        if (showCubeMap) {
+            glDepthMask(GL_FALSE);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
-        cubeModel->Draw();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
+            models[0]->Draw();
 
-        glDepthMask(GL_TRUE);
+            glDepthMask(GL_TRUE);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 #pragma endregion
 
-    delete cubeModel;
+    for (Model* m : models)
+    {
+        delete m;
+    }   
     glfwTerminate();
     return 0;
 }
@@ -181,6 +187,14 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        showCubeMap = true;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+        showCubeMap = false;
     }
 }
 

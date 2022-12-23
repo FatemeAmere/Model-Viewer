@@ -24,11 +24,13 @@ uniform sampler2D alphaTexture;
 
 uniform vec3 lightPosition;
 
+uniform bool useCubeMap;
 uniform samplerCube cubemap;
 
 uniform mat4 cubeMapOrientation;
-in vec3 cubemapPos;
-in vec3 cubemapNorm;
+in vec3 pos_CubeMap;
+in vec3 norm_CubeMap;
+in vec3 cubemapDir;
 
 void main(){
 	vec3 I = vec3(1,1,1);
@@ -45,13 +47,12 @@ void main(){
 
 	vec3 diffuse = max(0,dot(norm,lightDir)) * Kd;
 	vec3 specular = pow(max(0,dot(halfVec, norm)),shininess) * Ks;
-	//FragColor = vec4(I*(diffuse + specular) + ambient*Ka, 1.0f);
-	//vec3 dir = reflect(vec3(0,0,30) - cubemapPos, normalize(cubemapNorm));
-	//vec3 dir = reflect(view, norm);
-	//FragColor = texture(cubemap, mat3(cubeMapOrientation) * dir);
+	vec3 blinn = I*(diffuse + specular) + ambient*Ka;
 
+	//cubemap
+	vec3 v = normalize(pos_CubeMap - vec3(0,0,30));
+    vec3 R = reflect(v, normalize(norm_CubeMap));
+    vec3 reflection = useCubeMap ? texture(cubemap, inverse(mat3(cubeMapOrientation)) * R).rgb : vec3(0,0,0);
 
-	vec3 Ic = normalize(cubemapPos - vec3(0,0,30));
-    vec3 R = reflect(Ic, normalize(cubemapNorm));
-    FragColor = vec4(texture(cubemap,mat3(cubeMapOrientation) * R).rgb, 1.0);
+	FragColor = vec4(blinn + reflection * Ks, 1.0f);
 }

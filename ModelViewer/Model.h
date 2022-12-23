@@ -109,6 +109,7 @@ public:
             shader.setInt("specularExponentTexture", 3);
             shader.setInt("alphaTexture", 4);
             shader.setInt("cubemap", 5);
+            shader.setBool("useCubeMap", false);
         }
         #pragma endregion  
 	}
@@ -172,7 +173,7 @@ public:
                     shader.setFloat("specularExponent", ctm.M(i).Ns);
                     shader.setBool("usetexsc", false);
                 }
-
+                
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, t[0]);
                 glActiveTexture(GL_TEXTURE1);
@@ -188,8 +189,37 @@ public:
                 glDrawArrays(GL_TRIANGLES, ctm.GetMaterialFirstFace(i) * 3, ctm.GetMaterialFaceCount(i) * 3);
             }
         }
+    } 
+
+    void setLightPosition(glm::vec4 lp) {
+        lightPos = view * lp;
     }
 
+    void rotate(float xoffset, float yoffset) {
+        yaw += xoffset;
+        pitch += yoffset;
+    }
+
+    void adjustDistanceFromCamera(float offset) {
+        cameraDistance += offset;
+    }
+
+    void setCubeMapOrientation(glm::mat4 cmo) {
+        cubeMapOrientation = cmo;
+        shader.use();
+        shader.setMat4("cubeMapOrientation", cmo);
+    }
+
+    void ToggleCubeMapReflections(bool use) {
+        shader.use();
+        shader.setBool("useCubeMap", use);
+    }
+
+    glm::mat4 getModelMatrix() const {
+        return modelMatrix;
+    }
+
+private:
     void ManageTextures(GLuint* textures, cyTriMesh ctm, size_t materialNum) {
         if (ctm.M(materialNum).map_Ka) {
             glGenTextures(1, &textures[0]);
@@ -235,29 +265,6 @@ public:
             std::cout << "Failed to load texture " << name << std::endl;
         }
         stbi_image_free(data);
-    }
-
-    void setLightPosition(glm::vec4 lp) {
-        lightPos = view * lp;
-    }
-
-    void rotate(float xoffset, float yoffset) {
-        yaw += xoffset;
-        pitch += yoffset;
-    }
-
-    void adjustDistanceFromCamera(float offset) {
-        cameraDistance += offset;
-    }
-
-    void setCubeMapOrientation(glm::mat4 cmo) {
-        cubeMapOrientation = cmo;
-        shader.use();
-        shader.setMat4("cubeMapOrientation", cmo);
-    }
-
-    glm::mat4 getModelMatrix() const {
-        return modelMatrix;
     }
 };
 
