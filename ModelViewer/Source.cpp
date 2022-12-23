@@ -33,15 +33,15 @@ float pitch_light = 0;
 std::vector<Model*> models;
 bool showCubeMap = false;
 const char* cubemapImageNames[6] = {
-    "right.jpg", "left.jpg", 
-    "top.jpg", "bottom.jpg",
-    "front.jpg", "back.jpg"
+    "CubeMapTextures/right.jpg", "CubeMapTextures/left.jpg", 
+    "CubeMapTextures/top.jpg", "CubeMapTextures/bottom.jpg",
+    "CubeMapTextures/front.jpg", "CubeMapTextures/back.jpg"
 };
 #pragma endregion
 
 int main() {
     //cubemap
-    std::string fileName = "cube";
+    std::string fileName = "Models/cube";
     cyTriMesh cubeMap_ctm;
     if (!cubeMap_ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
         return -1;
@@ -50,7 +50,7 @@ int main() {
     std::cout << "Enter the name of the obj model: ";
     std::getline(std::cin, fileName);
     cyTriMesh ctm;
-    if (!ctm.LoadFromFileObj((fileName + ".obj").c_str())) {
+    if (!ctm.LoadFromFileObj(("Models/" + fileName + ".obj").c_str())) {
         return -1;
     }
     
@@ -126,7 +126,7 @@ int main() {
 #pragma endregion
 
     Shader otherShader("VertexShader.vs", "FragmentShader.fs");
-    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, -30.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, true));
+    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, true));
     /*std::cout << ctm.M(0).name;
     models.push_back(new Model(ctm, otherShader, glm::vec3(5.0f, 0.0f, -30.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, false));*/
 
