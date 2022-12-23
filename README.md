@@ -25,6 +25,6 @@ UPDATE:
 Cubemaps and environment mapping now supported. Press C/V to activate/deactivate cubemaps.  
 
 <img src="cubemap.png" width=50% height=50%>
-![ezgif com-gif-maker (3)](https://user-images.githubusercontent.com/47723405/209361964-aa908fc9-d5b3-4221-9e0e-67da7f1b547d.gif)
+![demo](https://user-images.githubusercontent.com/47723405/209361964-aa908fc9-d5b3-4221-9e0e-67da7f1b547d.gif)
 
 
