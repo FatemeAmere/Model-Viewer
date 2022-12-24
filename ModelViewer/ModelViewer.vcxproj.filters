@@ -29,6 +29,10 @@
     <None Include="FragmentShader.fs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="CubeMapFragmentShader.fs" />
+    <None Include="PlaneFragmentShader.fs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cyCore.h">

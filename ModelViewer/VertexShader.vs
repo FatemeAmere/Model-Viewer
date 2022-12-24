@@ -26,4 +26,5 @@ void main(){
 	cubemapDir = pos;
 	pos_CubeMap = (m*vec4(pos,1)).xyz;
 	norm_CubeMap = transpose(inverse(mat3(m)))*norm;
+
 }
