@@ -86,8 +86,6 @@ int main() {
 
 #pragma region TRANSFORMATION
     glm::vec3 cameraPos = glm::vec3(0, 0, 30.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, -cameraPos);
     glm::mat4 projection = glm::mat4(1.0f); 
     projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 500.0f);
     
@@ -97,7 +95,7 @@ int main() {
 
 #pragma region cubeMap
     Shader cubeMapShader("VertexShader.vs", "CubeMapFragmentShader.fs");
-    models.push_back(new Model(cubeMap_ctm, cubeMapShader, cameraPos, glm::vec3(20.0f, 20.0f, 20.0f), view, projection, false, true, false));
+    models.push_back(new Model(cubeMap_ctm, cubeMapShader, cameraPos, glm::vec3(20.0f, 20.0f, 20.0f), cameraPos, projection, false, true, false));
 
     //textures
     stbi_set_flip_vertically_on_load(false);
@@ -163,9 +161,9 @@ int main() {
 
     //model
     Shader otherShader("VertexShader.vs", "FragmentShader.fs");
-    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, true));
-    /*std::cout << ctm.M(0).name;
-    models.push_back(new Model(ctm, otherShader, glm::vec3(5.0f, 0.0f, -30.0f), glm::vec3(0.5f, 0.5f, 0.5f), view, projection, true, true, false));*/
+    models.push_back(new Model(ctm, otherShader, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), cameraPos, projection, true, true, true));
+    //std::cout << ctm.M(0).name;
+    //models.push_back(new Model(ctm, otherShader, glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f), cameraPos, projection, true, true, true));
 
 #pragma region render loop
     while (!glfwWindowShouldClose(window))
@@ -187,22 +185,26 @@ int main() {
         if (showCubeMap) {
             glActiveTexture(GL_TEXTURE5);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexID);
-            models[1]->setCubeMapOrientation(models[0]->getModelMatrix());
+            models[1]->setCubeMapOrientation(models[0]->getModelViewMatrix());
+            //models[2]->setCubeMapOrientation(models[0]->getModelViewMatrix());
         } 
         models[1]->ToggleCubeMapReflections(showCubeMap);
         models[1]->Draw();
+        //models[2]->ToggleCubeMapReflections(showCubeMap);
+        //models[2]->Draw();
         
         #pragma region planeUnderModel
         planeShader.use();
         glm::mat4 mod = glm::mat4(1.0f);
-        mod = glm::translate(mod, glm::vec3(0, -2, 0));
-        mod = mod * models[1]->getModelMatrix();
+        mod = glm::translate(mod, glm::vec3(0, -2.0f, 0));
+        mod = glm::rotate(mod, glm::radians(-90.0f), glm::vec3(1, 0, 0));
         mod = glm::scale(mod, glm::vec3(15, 15, 15));
+        glm::mat4 view = models[1]->getViewMatrix();
         planeShader.setMat4("m", mod);
         planeShader.setMat4("mvp", projection * view * mod);
         planeShader.setMat4("mv", view * mod);
         planeShader.setMat4("mvN", glm::transpose(glm::inverse(view * mod)));   //mv for Normals
-        planeShader.setMat4("cubeMapOrientation", models[0]->getModelMatrix());
+        planeShader.setMat4("cubeMapOrientation", models[0]->getModelViewMatrix());
         planeShader.setBool("useCubeMap", showCubeMap);
         planeShader.setVec3("lightPosition", lightPosition);
         planeShader.setVec3("ks", glm::vec3(1, 1, 1));

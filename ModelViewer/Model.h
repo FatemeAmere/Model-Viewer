@@ -27,18 +27,19 @@ private:
     float cameraDistance = 0;
     glm::vec4 lightPos = glm::vec4(0, 0, 0, 1);
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
     glm::vec3 translation = glm::vec3(0,0,0);
     glm::vec3 scale = glm::vec3(1,1,1);
+    glm::vec3 cameraPosition = glm::vec3(1,1,1);
+    glm::mat4 view = glm::mat4(1.0f);
 
     glm::mat4 cubeMapOrientation = glm::mat4(1.0f);;
 
 	Model();
 
 public:
-	Model(cyTriMesh ctm, Shader shader, glm::vec3 translation, glm::vec3 scale, glm::mat4 view, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
-        materialCount(0), shader(shader), view(view), projection(projection), translation(translation), scale(scale), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
+	Model(cyTriMesh ctm, Shader shader, glm::vec3 translation, glm::vec3 scale, glm::vec3 cameraPosition, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
+        materialCount(0), shader(shader), cameraPosition(cameraPosition), projection(projection), translation(translation), scale(scale), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
 
         stbi_set_flip_vertically_on_load(true);
 
@@ -127,17 +128,20 @@ public:
         shader.use();
 
         modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, translation);
-        if (movementIsEnabled) {
+        /*if (movementIsEnabled) {
             modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, -cameraDistance));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(pitch), glm::vec3(1, 0, 0));
             modelMatrix = glm::rotate(modelMatrix, glm::radians(yaw), glm::vec3(0, 1, 0));
-        }
-
+        }*/
+        modelMatrix = glm::translate(modelMatrix, translation);
         if (rotateAxis) {
             modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
         }
 
+        view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0, 0, -30-cameraDistance));
+        view = glm::rotate(view, glm::radians(pitch), glm::vec3(1, 0, 0));
+        view = glm::rotate(view, glm::radians(yaw), glm::vec3(0, 1, 0));
         shader.setMat4("m",  modelMatrix);
         shader.setMat4("mvp", projection * view * modelMatrix);
         shader.setMat4("mv", view * modelMatrix);
@@ -215,8 +219,16 @@ public:
         shader.setBool("useCubeMap", use);
     }
 
+    glm::mat4 getModelViewMatrix() const {
+        return view*modelMatrix;
+    }
+
     glm::mat4 getModelMatrix() const {
         return modelMatrix;
+    }
+
+    glm::mat4 getViewMatrix() const {
+        return view;
     }
 
 private:

@@ -50,9 +50,9 @@ void main(){
 	vec3 blinn = I*(diffuse + specular) + ambient*Ka;
 
 	//cubemap
-	vec3 v = normalize(pos_CubeMap - vec3(0,0,30));
-    vec3 R = reflect(v, normalize(norm_CubeMap));
-    vec3 reflection = useCubeMap ? texture(cubemap, inverse(mat3(cubeMapOrientation)) * R).rgb : vec3(0,0,0);
+	vec3 v = -view;//normalize(posForColoring - vec3(0,0,30));
+    vec3 R = reflect(v, normalize(norm));
+    vec3 reflection = useCubeMap ? texture(cubemap, inverse(mat3(cubeMapOrientation)) *R).rgb : vec3(0,0,0); 
 
 	FragColor = vec4(blinn + reflection * Ks, 1.0f);
 }
