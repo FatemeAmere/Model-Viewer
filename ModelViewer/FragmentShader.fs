@@ -27,10 +27,7 @@ uniform vec3 lightPosition;
 uniform bool useCubeMap;
 uniform samplerCube cubemap;
 
-uniform mat4 cubeMapOrientation;
-in vec3 pos_CubeMap;
-in vec3 norm_CubeMap;
-in vec3 cubemapDir;
+uniform mat4 viewMatrix;
 
 void main(){
 	vec3 I = vec3(1,1,1);
@@ -49,10 +46,17 @@ void main(){
 	vec3 specular = pow(max(0,dot(halfVec, norm)),shininess) * Ks;
 	vec3 blinn = I*(diffuse + specular) + ambient*Ka;
 
-	//cubemap
-	vec3 v = -view;//normalize(posForColoring - vec3(0,0,30));
-    vec3 R = reflect(v, normalize(norm));
-    vec3 reflection = useCubeMap ? texture(cubemap, inverse(mat3(cubeMapOrientation)) *R).rgb : vec3(0,0,0); 
+
+	//computing reflection in view space
+	vec3 vi = posForColoring;
+	vec3 r = inverse(mat3(viewMatrix)) * reflect(vi, norm);
+	vec3 reflection = useCubeMap ? texture(cubemap, r).rgb : vec3(0,0,0);
+
+	/*ANOTHER WAY
+	Computing reflections in world space
+	vec3 vi = pos_CubeMap - vec3(inverse(viewMatrix) * vec4(0,0,0,1));
+	vec3 r = reflect(vi, norm_CubeMap);
+	vec3 reflection = useCubeMap ? texture(cubemap, r).rgb : vec3(0,0,0);*/
 
 	FragColor = vec4(blinn + reflection * Ks, 1.0f);
 }

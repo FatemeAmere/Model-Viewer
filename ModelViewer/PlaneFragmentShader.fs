@@ -19,6 +19,8 @@ uniform mat4 cubeMapOrientation;
 in vec3 pos_CubeMap;
 in vec3 norm_CubeMap;
 
+uniform vec3 cameraWorldPosition;
+
 void main(){
 	vec3 I = vec3(1,1,1);
 	vec3 ambient = vec3(0.1f,0.1f,0.1f);
@@ -33,9 +35,9 @@ void main(){
 	vec3 blinn = I*(diffuse + specular) + ambient*ka;
 
 	//cubemap
-	vec3 v = normalize(pos_CubeMap - vec3(0,0,30));
+	vec3 v =  pos_CubeMap - cameraWorldPosition;//-view;//normalize(posForColoring - vec3(0,0,30));
     vec3 R = reflect(v, normalize(norm_CubeMap));
-    vec3 reflection = useCubeMap ? texture(cubemap, inverse(mat3(cubeMapOrientation)) * R).rgb : vec3(0,0,0);
+    vec3 reflection = useCubeMap ? texture(cubemap, R).rgb : vec3(0,0,0); // inverse(mat3(cubeMapOrientation)) *
 
 	FragColor = vec4(blinn + reflection * ks, 1.0f);
 	//FragColor = vec4(1,1,1,1);

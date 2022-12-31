@@ -41,6 +41,12 @@ public:
 	Model(cyTriMesh ctm, Shader shader, glm::vec3 translation, glm::vec3 scale, glm::vec3 cameraPosition, glm::mat4 projection, bool loadMaterial = true, bool movementIsEnabled = true, bool rotateAxis = true): ctm(ctm),
         materialCount(0), shader(shader), cameraPosition(cameraPosition), projection(projection), translation(translation), scale(scale), loadMaterial(loadMaterial), movementIsEnabled(movementIsEnabled), rotateAxis(rotateAxis){
 
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, translation);
+        if (rotateAxis) {
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+        }
+
         stbi_set_flip_vertically_on_load(true);
 
         #pragma region Vertex
@@ -127,26 +133,22 @@ public:
     void Draw() {
         shader.use();
 
-        modelMatrix = glm::mat4(1.0f);
-        /*if (movementIsEnabled) {
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 0, -cameraDistance));
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(pitch), glm::vec3(1, 0, 0));
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(yaw), glm::vec3(0, 1, 0));
-        }*/
-        modelMatrix = glm::translate(modelMatrix, translation);
-        if (rotateAxis) {
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-        }
-
         view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0, 0, -30-cameraDistance));
+        view = glm::translate(view, -cameraPosition);
+        view = glm::translate(view, glm::vec3(0, 0, -cameraDistance));
         view = glm::rotate(view, glm::radians(pitch), glm::vec3(1, 0, 0));
         view = glm::rotate(view, glm::radians(yaw), glm::vec3(0, 1, 0));
-        shader.setMat4("m",  modelMatrix);
+
+        shader.setMat4("viewMatrix",  view);
         shader.setMat4("mvp", projection * view * modelMatrix);
         shader.setMat4("mv", view * modelMatrix);
         shader.setMat4("mvN", glm::transpose(glm::inverse(view * modelMatrix)));   //mv for Normals
         shader.setVec3("lightPosition", lightPos);
+
+        glm::mat4 r = glm::mat4(1.0f);
+        r = glm::rotate(r, glm::radians(pitch), glm::vec3(1, 0, 0));
+        r = glm::rotate(r, glm::radians(yaw), glm::vec3(0, 1, 0));
+        shader.setVec3("cameraWorldPosition", r * glm::vec4(cameraPosition,1));
 
         if (materialCount == 0 || !loadMaterial) {
             glBindVertexArray(VAO);
@@ -196,7 +198,7 @@ public:
     } 
 
     void setLightPosition(glm::vec4 lp) {
-        lightPos = view * lp;
+        lightPos = lp;
     }
 
     void rotate(float xoffset, float yoffset) {
