@@ -19,12 +19,12 @@ A demo of the project can be found [here](https://youtu.be/ZYSf9GgbSG4)
 The famous Utah teapot    
   
 <img src="yoda.png" width=50% height=50%>
-Also this yoda with 7 materials
+Also this yoda with 7 materials  
 
 UPDATE:
 Cubemaps and environment mapping now supported. Press C/V to activate/deactivate cubemaps.  
 
 <img src="cubemap.png" width=50% height=50%>
-![demo](https://user-images.githubusercontent.com/47723405/209361964-aa908fc9-d5b3-4221-9e0e-67da7f1b547d.gif)
+<img src="https://user-images.githubusercontent.com/47723405/209361964-aa908fc9-d5b3-4221-9e0e-67da7f1b547d.gif" width="40" height="40" />
 
 
